@@ -37,6 +37,7 @@
 #import <AsyncDisplayKit/ASTraitCollection.h>
 #import <AsyncDisplayKit/ASWeakProxy.h>
 #import <AsyncDisplayKit/ASResponderChainEnumerator.h>
+#import <AsyncDisplayKit/ASTipsController.h>
 
 #if ASDisplayNodeLoggingEnabled
   #define LOG(...) NSLog(__VA_ARGS__)
@@ -243,11 +244,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // Ensure this value is cached on the main thread before needed in the background.
   ASScreenScale();
-}
-
-+ (BOOL)layerBackedNodesEnabled
-{
-  return YES;
 }
 
 + (Class)viewClass
@@ -574,10 +570,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _viewBlock = nil;
     _viewClass = [view class];
   } else {
-    if (!_viewClass) {
-      _viewClass = [self.class viewClass];
-    }
-    view = [[_viewClass alloc] init];
+    Class c = _viewClass ?: [_ASDisplayView class];
+    view = [[c alloc] init];
   }
   
   // Special handling of wrapping UIKit components
@@ -610,10 +604,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layerBlock = nil;
     _layerClass = [layer class];
   } else {
-    if (!_layerClass) {
-      _layerClass = [self.class layerClass];
-    }
-    layer = [[_layerClass alloc] init];
+    Class c = _layerClass ?: [_ASDisplayLayer class];
+    layer = [[c alloc] init];
   }
 
   return layer;
@@ -805,32 +797,32 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _flags.synchronous;
 }
 
-- (void)setSynchronous:(BOOL)flag
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _flags.synchronous = flag;
-}
-
 - (void)setLayerBacked:(BOOL)isLayerBacked
 {
-  if (![self.class layerBackedNodesEnabled]) {
+  if (!self.supportsLayerBacking) {
+    ASDisplayNodeFailAssert(@"Node %@ does not support layer backing.", self);
     return;
   }
 
   ASDN::MutexLocker l(__instanceLock__);
-  ASDisplayNodeAssert(!_view && !_layer, @"Cannot change isLayerBacked after layer or view has loaded");
-  ASDisplayNodeAssert(!_viewBlock && !_layerBlock, @"Cannot change isLayerBacked when a layer or view block is provided");
-  ASDisplayNodeAssert(!_viewClass && !_layerClass, @"Cannot change isLayerBacked when a layer or view class is provided");
-
-  if (isLayerBacked != _flags.layerBacked && !_view && !_layer) {
-    _flags.layerBacked = isLayerBacked;
+  if ([self _locked_isNodeLoaded]) {
+    ASDisplayNodeFailAssert(@"Cannot change layerBacked after view/layer has loaded.");
+    return;
   }
+
+  _flags.layerBacked = isLayerBacked;
 }
 
 - (BOOL)isLayerBacked
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.layerBacked;
+}
+
+- (BOOL)supportsLayerBacking
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return !_flags.synchronous && !_flags.viewEverHadAGestureRecognizerAttached && _viewClass == nil && _layerClass == nil;
 }
 
 - (BOOL)shouldAnimateSizeChanges
@@ -855,6 +847,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   _threadSafeBounds = newBounds;
+}
+
+- (void)nodeViewDidAddGestureRecognizer
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _flags.viewEverHadAGestureRecognizerAttached = YES;
 }
 
 #pragma mark - Layout
@@ -3651,6 +3649,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   [_interfaceStateDelegate didEnterVisibleState];
+#if AS_ENABLE_TIPS
+  [ASTipsController.shared nodeDidAppear:self];
+#endif
 }
 
 - (void)didExitVisibleState
