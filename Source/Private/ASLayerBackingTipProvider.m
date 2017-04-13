@@ -34,7 +34,7 @@
   }
 
   ASTip *result = [[ASTip alloc] initWithNode:node
-                                      subkind:ASTipSubkindEnableLayerBacking
+										 kind:ASTipKindEnableLayerBacking
                                        format:@"Enable layer backing to improve performance"];
   return result;
 }

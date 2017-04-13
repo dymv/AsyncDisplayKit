@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDisplayNode;
 
 typedef NS_ENUM (NSInteger, ASTipKind) {
-  ASTipSubkindEnableLayerBacking
+  ASTipKindEnableLayerBacking
 };
 
 AS_SUBCLASSING_RESTRICTED
