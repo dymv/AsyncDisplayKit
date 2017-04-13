@@ -353,7 +353,7 @@
 		CCA221D31D6FA7EF00AF6A0F /* ASViewControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CCA221D21D6FA7EF00AF6A0F /* ASViewControllerTests.m */; };
 		CCA282B41E9EA7310037E8B7 /* ASTipsController.h in Headers */ = {isa = PBXBuildFile; fileRef = CCA282B21E9EA7310037E8B7 /* ASTipsController.h */; };
 		CCA282B51E9EA7310037E8B7 /* ASTipsController.m in Sources */ = {isa = PBXBuildFile; fileRef = CCA282B31E9EA7310037E8B7 /* ASTipsController.m */; };
-		CCA282B81E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.h in Headers */ = {isa = PBXBuildFile; fileRef = CCA282B61E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.h */; };
+		CCA282B81E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.h in Headers */ = {isa = PBXBuildFile; fileRef = CCA282B61E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CCA282B91E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.m in Sources */ = {isa = PBXBuildFile; fileRef = CCA282B71E9EA8E40037E8B7 /* AsyncDisplayKit+Tips.m */; };
 		CCA282BC1E9EABDD0037E8B7 /* ASTipProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = CCA282BA1E9EABDD0037E8B7 /* ASTipProvider.h */; };
 		CCA282BD1E9EABDD0037E8B7 /* ASTipProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = CCA282BB1E9EABDD0037E8B7 /* ASTipProvider.m */; };
